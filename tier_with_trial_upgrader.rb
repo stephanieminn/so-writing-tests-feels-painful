@@ -8,12 +8,7 @@ class TierWithTrialUpgrader
     trial = start_trial
 
     if membership.has_paid_subscription?
-      subscription.update(
-        from_tier: subscription.tier_name,
-        to_tier: tier.name,
-        trial_end: trial.ends_at
-      )
-      SubscriptionNotifier.notify_trial_started(subscription, trial)
+      subscription.notified_update_with_trial(tier, trial)
     end
 
     membership.update!(tier:)
