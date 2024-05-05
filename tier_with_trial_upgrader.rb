@@ -8,7 +8,11 @@ class TierWithTrialUpgrader
     trial = start_trial
 
     if membership.has_paid_subscription?
-      update_subscription(trial)
+      subscription.update(
+        from_tier: subscription.tier_name,
+        to_tier: tier.name,
+        trial_end: trial.ends_at
+      )
       SubscriptionNotifier.notify_trial_started(subscription, trial)
     end
 
@@ -21,14 +25,6 @@ class TierWithTrialUpgrader
 
   def subscription
     @subscription ||= StripeSubscription.new(membership:)
-  end
-
-  def update_subscription(trial)
-    subscription.update(
-      from_tier: subscription.tier_name,
-      to_tier: tier.name,
-      trial_end: trial.ends_at
-    )
   end
 
   def start_trial
