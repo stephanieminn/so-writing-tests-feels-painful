@@ -9,6 +9,7 @@ class TierWithTrialUpgrader
 
     if membership.has_paid_subscription?
       update_subscription(trial)
+      SubscriptionNotifier.notify_trial_started(subscription, trial)
     end
 
     membership.update!(tier:)

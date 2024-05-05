@@ -19,6 +19,25 @@ RSpec.describe TierWithTrialUpgrader do
           trial_end: trial.ends_at
         )
       end
+
+      it "sends trial notification started for subscription" do
+        membership = create(:membership, has_paid_subscription: true)
+        tier = build(:tier)
+
+        subscription = StripeSubscription.new(membership:)
+        allow(StripeSubscription).to receive(:new).with(membership:).and_return(subscription)
+        allow(subscription).to receive(:update)
+
+        trial = build(:trial)
+        allow(Trial).to receive(:start).and_return(trial)
+
+        allow(SubscriptionNotifier).to receive(:notify_trial_started)
+
+        TierWithTrialUpgrader.new(membership:, tier:).upgrade
+
+        expect(SubscriptionNotifier)
+          .to have_received(:notify_trial_started).with(subscription, trial)
+      end
     end
   end
 end
